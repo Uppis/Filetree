@@ -1,4 +1,4 @@
-package filetree;
+package com.vajasoft.filetree;
 
 import com.vajasoft.classfile.ClassFile;
 import com.vajasoft.classfile.Reference;

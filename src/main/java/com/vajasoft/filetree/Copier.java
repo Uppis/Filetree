@@ -1,4 +1,4 @@
-package filetree;
+package com.vajasoft.filetree;
 
 import java.io.*;
 import java.nio.channels.*;

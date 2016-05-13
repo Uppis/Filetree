@@ -1,21 +1,21 @@
-package filetree;
+package com.vajasoft.filetree;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
-public class ZipInputStreamTarget implements ScanTarget {
-    ZipInputStream zis;
+public class ZipTarget implements ScanTarget {
+    ZipFile file;
     ZipEntry entry;
 
-    public ZipInputStreamTarget(ZipInputStream is, ZipEntry e) {
-        zis = is;
+    public ZipTarget(ZipFile f, ZipEntry e) {
+        file = f;
         entry = e;
     }
 
     public InputStream getInputStream() throws IOException {
-        return zis;
+        return file.getInputStream(entry);
     }
 
     public String getName() {
@@ -30,7 +30,6 @@ public class ZipInputStreamTarget implements ScanTarget {
         return entry.getTime();
     }
 
-    @Override
     public String toString() {
         return getName();
     }
