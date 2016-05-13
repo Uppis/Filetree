@@ -1,0 +1,82 @@
+package filetree;
+
+import java.io.*;
+import java.nio.channels.*;
+
+public class Copier {
+    private File rootDir;
+    private File targetDir;
+    private FileFilter includeFilter;
+
+    Copier(File from, File to, FileFilter filter) {
+        rootDir = from;
+        targetDir = to;
+        includeFilter = filter;
+    }
+
+    public void copyDir(File fromDir, File toDir) throws IOException {
+        File[] files = fromDir.listFiles(includeFilter);
+        for (File from : files) {
+            File to = new File(toDir, from.getName());
+            if (from.isDirectory()) {
+                to.mkdirs();
+                copyDir(from, to);
+            }
+            else {
+                if (to.exists() == false)
+                    to.createNewFile();
+                copyFile(from, to);
+            }
+        }
+    }
+
+    private void copyFile(File fromFile, File toFile) throws IOException {
+        FileInputStream fis = new FileInputStream(fromFile);
+        FileOutputStream fos = new FileOutputStream(toFile);
+        FileChannel in = fis.getChannel();
+        in.transferTo(0, in.size(), fos.getChannel());
+        fos.close();
+        fis.close();
+    }
+
+    public static void main(String[] args) throws IOException {
+        if (args.length < 2)
+            errorExit("Usage: filetree.Copier <from dir> <to dir> [java.io.FileFilter class]", 1);
+
+        File fromDir = new File(args[0]);
+        if (!fromDir.isDirectory())
+            errorExit("Error: " + args[0] + " is not directory !", 2);
+
+        File toDir = new File(args[1]);
+        if (!toDir.exists())
+            toDir.mkdirs();
+        else if (!toDir.isDirectory())
+            errorExit("Error: " + args[1] + " is not directory !", 2);
+
+        FileFilter filter = new DefaultFilter();
+        if (args.length > 2) {
+            try {
+                Class cl = Class.forName(args[2]);
+                filter = (FileFilter) cl.newInstance();
+            } catch (Exception ex) {
+                errorExit("Can't create filter: " + ex, 3);
+            }
+        }
+
+        Copier copier = new Copier(fromDir, toDir, filter);
+        copier.copyDir(fromDir, toDir);
+
+        System.exit(0);
+    }
+
+    private static void errorExit(String msg, int exitCode) {
+        System.out.println(msg);
+        System.exit(exitCode);
+    }
+
+    private static class DefaultFilter implements FileFilter {
+        public boolean accept(File f) {
+            return true;
+        }
+    }
+}
